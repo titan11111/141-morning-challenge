@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0D0D14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>MORNING CHALLENGE</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">MORNING<br>CHALLENGE</div>
+  <div class="logo-sub">WAKE UP SYSTEM v3.0</div>
+  <div class="hdr-date" id="dateDisplay"></div>
+  <button type="button" class="cfg-btn tap" id="btn-cfg" aria-label="設定">⚙️</button>
+</div>
+
+<div class="goal">
+  <div>
+    <div style="font-family:var(--font-mono);font-size:.6rem;letter-spacing:2px;color:var(--mut);margin-bottom:4px">TARGET TIME</div>
+    <div class="goal-time" id="goalDisplay">7:15</div>
+  </div>
+  <div class="goal-sub" id="goal-sub-text">平日この時刻までに起きると +1<br>週2回達成 → オリパ1パック開封🎴</div>
+</div>
+
+<p class="week-hint" id="weekHintNote">週の達成カウントは「月曜始まりの週」（ISO週）です。下のカレンダー行の並びだけ、設定で日曜始まりに変更できます。</p>
+<p class="week-hint" id="globalScores" style="margin-top:8px;border-color:rgba(200,255,62,.25);background:rgba(200,255,62,.05)">🌐 共有スコア（Vercel）: 長男 <strong id="g-taro">—</strong> 回 / 次男 <strong id="g-jiro">—</strong> 回 <span id="g-note" style="font-weight:400;color:var(--mut)"></span></p>
+
+<div class="tabs" style="margin-top:14px" role="tablist" aria-label="記録する子どもを切り替え">
+  <button type="button" class="tab tc tap" id="tab-taro" role="tab" aria-selected="true" aria-controls="panel-taro">🎴 長男 / ORIPA</button>
+  <button type="button" class="tab tap" id="tab-jiro" role="tab" aria-selected="false" aria-controls="panel-jiro">📚 次男 / TOSHO</button>
+</div>
+
+<div class="panel active" id="panel-taro" role="tabpanel" aria-labelledby="tab-taro" aria-hidden="false">
+
+  <p class="sec">// this week — oripa challenge</p>
+
+  <div id="taro-achieve" style="display:none">
+    <div class="achieve-banner">
+      <span class="big-icon">🎴</span>
+      <div>
+        <div class="achieve-title">WEEK CLEAR！</div>
+        <div class="achieve-sub" id="achieve-sub-text">週2回達成！オリパ1パック開封権GET🎉</div>
+      </div>
+    </div>
+    <div style="margin:0 0 0"></div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">Week Progress</div>
+    <div class="week-widget">
+      <div class="week-header">
+        <span class="week-label">THIS WEEK</span>
+        <span class="week-count" id="taro-week-cnt">0 / 2</span>
+      </div>
+      <div class="week-days" id="taro-week-days"></div>
+    </div>
+    <div class="gauge-wrap">
+      <div class="gauge-track"><div class="gauge-fill" id="taro-gauge" style="width:0%"></div></div>
+      <div class="gauge-lbl" id="taro-gauge-lbl">
+        <span class="cnt" id="taro-cnt-lbl">0 / 2 回</span>
+        <span id="taro-gauge-hint" style="color:var(--mut)">達成でオリパ1パック</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="sec">// today's check-in</p>
+  <div class="card">
+    <div class="ctitle">Check In — 平日のみ有効</div>
+    <p class="deadline-msg" id="deadline-msg-taro" style="display:none" role="status"></p>
+    <button type="button" class="chk-btn chk-c tap" id="taro-ok-btn">
+      <span class="ic">⚡</span>
+      <div><span class="ms" id="chk-ok-label-taro">7:15までに起きた！</span><span class="ss" id="chk-ok-sub-taro">週カウント +1（週2回達成でオリパ開封権）</span></div>
+    </button>
+    <button type="button" class="chk-btn chk-a tap" id="taro-ab-btn">
+      <span class="ic">💤</span>
+      <div><span class="ms">お休み / 遅刻</span><span class="ss">記録のみ・カウントなし</span></div>
+    </button>
+  </div>
+
+  <p class="sec">// all-time stats</p>
+  <div class="card">
+    <div class="ctitle">Stats</div>
+    <div class="sgrid">
+      <div class="sbox so"><span class="sn" id="t-pack">0</span><span class="sl">🎴 未渡し（残り）</span></div>
+      <div class="sbox sc"><span class="sn" id="t-total-ok">0</span><span class="sl" id="t-total-ok-sl">✅ 平日・起床成功（ローカル）</span></div>
+      <div class="sbox sp"><span class="sn" id="t-given">0</span><span class="sl">📦 渡し済み累計</span></div>
+      <div class="sbox"><span class="sn" style="color:var(--txt)" id="t-total">0</span><span class="sl">📆 総記録日</span></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;align-items:stretch">
+      <button type="button" class="exbtn ec tap" id="t-ex" disabled style="margin-top:0;flex:1">▶ 渡した！</button>
+      <button type="button" class="exbtn tap" id="t-undo" disabled
+        style="margin-top:0;flex:0 0 auto;min-width:52px;padding:14px 10px;
+               background:rgba(255,0,110,.06);border-color:rgba(255,0,110,.35);color:var(--c2);">
+        ↩ 取消
+      </button>
+    </div>
+    <div style="margin-top:10px;font-family:var(--font-mono);font-size:.64rem;
+                letter-spacing:1px;color:var(--mut);text-align:center">
+      累計獲得 <span id="t-pack-total" style="color:var(--c5)">0</span> パック
+      ／ 渡し済み <span id="t-given2" style="color:var(--c4)">0</span> パック
+    </div>
+  </div>
+
+  <p class="sec">// log</p>
+  <details class="hist-details" id="hist-details-taro">
+    <summary class="hist-summary">History <span style="font-weight:400;opacity:.75;text-transform:none;letter-spacing:0">（タップで開閉）</span></summary>
+    <div class="hist-body">
+      <div class="hwrap">
+        <table><thead><tr><th>Date</th><th>Day</th><th>Result</th><th>Week</th></tr></thead>
+        <tbody id="t-hist"></tbody></table>
+        <div class="empty-msg" id="t-emp">— NO DATA YET —</div>
+      </div>
+    </div>
+  </details>
+</div>
+
+<div class="panel" id="panel-jiro" role="tabpanel" aria-labelledby="tab-jiro" aria-hidden="true">
+
+  <p class="sec">// tosho card progress</p>
+  <div class="card">
+    <div class="ctitle">Point Progress</div>
+    <div class="prog-wrap"><div class="prog-fill" id="j-bar" style="width:0%"></div></div>
+    <div class="prog-lbl">
+      <span id="j-pt-lbl">0 PT</span>
+      <span id="j-tgt-lbl">10PT = ¥500</span>
+    </div>
+    <div class="sgrid" style="margin-top:12px">
+      <div class="sbox sg"><span class="sn" id="j-pt">0</span><span class="sl">📚 現在pt</span></div>
+      <div class="sbox sc"><span class="sn" id="j-card">0</span><span class="sl">🎁 交換済み</span></div>
+      <div class="sbox sk"><span class="sn" id="j-streak">0</span><span class="sl">🔥 連続起き</span></div>
+      <div class="sbox"><span class="sn" style="color:var(--txt)" id="j-total">0</span><span class="sl">📆 総記録日</span></div>
+      <div class="sbox sc"><span class="sn" id="j-total-ok">0</span><span class="sl" id="j-total-ok-sl">✅ 起床OK回（ローカル）</span></div>
+    </div>
+    <button type="button" class="exbtn eg tap" id="j-ex" disabled>▶ ポイント → 図書カード 交換</button>
+  </div>
+
+  <p class="sec">// today's check-in</p>
+  <div class="card">
+    <div class="ctitle">Check In</div>
+    <p class="deadline-msg" id="deadline-msg-jiro" style="display:none" role="status"></p>
+    <button type="button" class="chk-btn chk-l tap" id="jiro-ok-btn">
+      <span class="ic">⚡</span>
+      <div><span class="ms" id="chk-ok-label-jiro">7:15までに起きた！</span><span class="ss" id="chk-ok-sub-jiro">図書カードポイント +1pt</span></div>
+    </button>
+    <button type="button" class="chk-btn chk-a tap" id="jiro-ab-btn">
+      <span class="ic">💤</span>
+      <div><span class="ms">お休み / 遅刻</span><span class="ss">記録のみ・ポイントなし</span></div>
+    </button>
+  </div>
+
+  <p class="sec">// log</p>
+  <details class="hist-details" id="hist-details-jiro">
+    <summary class="hist-summary">History <span style="font-weight:400;opacity:.75;text-transform:none;letter-spacing:0">（タップで開閉）</span></summary>
+    <div class="hist-body">
+      <div class="hwrap">
+        <table><thead><tr><th>Date</th><th>Day</th><th>Result</th><th>Note</th></tr></thead>
+        <tbody id="j-hist"></tbody></table>
+        <div class="empty-msg" id="j-emp">— NO DATA YET —</div>
+      </div>
+    </div>
+  </details>
+</div>
+
+<div class="ov ov-blur" id="exModal" role="dialog" aria-modal="true" aria-labelledby="ex-title">
+  <div class="modal">
+    <div class="mtitle" id="ex-title" style="color:var(--c5)">GIVE PACK</div>
+    <div class="mbody" id="ex-body"></div>
+    <div class="ir"><label for="ex-cnt">枚数</label><input type="number" id="ex-cnt" min="1" value="1" inputmode="numeric"/></div>
+    <button type="button" class="mb mb-ok tap" id="btn-do-ex">▶ 実行する</button>
+    <button type="button" class="mb mb-no tap" data-close="exModal">キャンセル</button>
+  </div>
+</div>
+
+<div class="ov ov-blur" id="undoModal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="mtitle" style="color:var(--c2)">UNDO — 渡した取消</div>
+    <div class="mbody" id="undo-body"></div>
+    <button type="button" class="mb tap" style="background:rgba(255,0,110,.09);border-color:rgba(255,0,110,.4);color:var(--c2)" id="btn-do-undo">↩ 取り消す</button>
+    <button type="button" class="mb mb-no tap" data-close="undoModal">キャンセル</button>
+  </div>
+</div>
+
+<div class="ov ov-blur" id="cfgModal" role="dialog" aria-modal="true" aria-labelledby="cfg-title">
+  <div class="modal">
+    <div class="mtitle" id="cfg-title" style="color:var(--c1)">SETTINGS</div>
+
+    <div class="cfg-sec">目標・週</div>
+    <div class="ir"><label for="s-time">目標時刻</label><input type="time" id="s-time" value="07:15"/></div>
+    <div class="ir"><label for="s-req">週の必要回数</label><input type="number" id="s-req" min="1" max="5" value="2" inputmode="numeric"/></div>
+    <div class="ir"><label for="s-week-start">カレンダー行</label>
+      <select id="s-week-start">
+        <option value="mon">月曜始まり（月〜日）</option>
+        <option value="sun">日曜始まり（日〜土）</option>
+      </select>
+    </div>
+
+    <div class="cfg-sec">共有（Vercel）</div>
+    <p class="mbody" style="margin-bottom:10px">同じ累計を家族全員で見るには、Vercel にデプロイして KV を接続し、必要なら GitHub Pages 用にこの URL を入力してください（空なら同じオリジンの /api を試します）。</p>
+    <div class="ir"><label for="s-api-base">APIベースURL</label><input type="url" id="s-api-base" placeholder="https://your-app.vercel.app" autocomplete="off"/></div>
+
+    <div class="cfg-sec">図書カード</div>
+    <div class="ir"><label for="s-rate">交換レート(pt)</label><input type="number" id="s-rate" min="1" value="10" inputmode="numeric"/></div>
+    <div class="ir"><label for="s-yen">図書カード額(円)</label><input type="number" id="s-yen" min="100" step="100" value="500" inputmode="numeric"/></div>
+
+    <div class="cfg-sec">バックアップ</div>
+    <p class="mbody" style="margin-bottom:10px">データはこの端末のブラウザに保存されます。機種変更前にエクスポートしてください。</p>
+    <button type="button" class="mb mb-ok tap" id="btn-export">▶ JSONをコピー（エクスポート）</button>
+    <div class="ir" style="align-items:flex-start"><label for="import-area">インポート</label><textarea id="import-area" placeholder="JSONを貼り付け"></textarea></div>
+    <button type="button" class="mb mb-ok tap" id="btn-import">▶ 貼り付けたデータを取り込む</button>
+
+    <div class="cfg-sec">危険な操作</div>
+    <button type="button" class="mb mb-rs tap" id="btn-open-reset">⚠ データリセット…</button>
+    <button type="button" class="mb mb-ok tap" id="btn-save-cfg">▶ 設定を保存</button>
+    <button type="button" class="mb mb-no tap" data-close="cfgModal">キャンセル</button>
+  </div>
+</div>
+
+<div class="ov ov-blur" id="resetModal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="mtitle" style="color:var(--c2)">データリセット</div>
+    <div class="mbody">全データが消えます。エクスポート未実施の場合、復元できません。</div>
+    <label class="chk-row"><input type="checkbox" id="reset-confirm"/> 内容を理解し、削除に同意します</label>
+    <button type="button" class="mb mb-rs tap" id="btn-execute-reset" disabled>▶ 完全にリセット</button>
+    <button type="button" class="mb mb-no tap" id="btn-reset-cancel">キャンセル</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="main.js" defer></script>
+</body>
+</html>
