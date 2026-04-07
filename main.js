@@ -1,6 +1,6 @@
 const DEF = {
   goalTime:'07:15', weekReq:2, rate:10, yen:500,
-  apiBase:'',
+  apiBase:'https://141-morning-challenge.vercel.app',
   weekDisplayStart:'mon',
   taro:{
     pack:0,
