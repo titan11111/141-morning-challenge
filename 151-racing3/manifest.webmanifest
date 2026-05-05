@@ -1,0 +1,20 @@
+{
+  "name": "Neon Ridge Racer",
+  "short_name": "NeonRacer",
+  "description": "疑似3Dアウトラン系ハイスピードレース。夜のリッジを切り裂いて最速ラップを叩き出せ。",
+  "start_url": "./gpt-race.html",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0a0f18",
+  "theme_color": "#0a0f18",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games"],
+  "lang": "ja"
+}
